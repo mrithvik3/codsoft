@@ -1,0 +1,124 @@
+class Task:
+    def __init__(self, title, description='', due_date=None, completed=False):
+        self.title = title
+        self.description = description
+        self.due_date = due_date
+        self.completed = completed
+import json
+
+tasks = []
+
+def save_tasks(filename='tasks.json'):
+    with open(filename, 'w') as f:
+        json.dump([task.__dict__ for task in tasks], f)
+
+def load_tasks(filename='tasks.json'):
+    global tasks
+    try:
+        with open(filename, 'r') as f:
+            tasks = [Task(**task) for task in json.load(f)]a
+    except FileNotFoundError:
+        tasks = []
+
+def add_task(title, description='', due_date=None):
+    task = Task(title, description, due_date)
+    tasks.append(task)
+    save_tasks()
+
+def list_tasks():
+    for i, task in enumerate(tasks):
+        print(f"{i+1}. {task.title} - {'Completed' if task.completed else 'Pending'}")
+
+def mark_completed(index):
+    if 0 <= index < len(tasks):
+        tasks[index].completed = True
+        save_tasks()
+
+# Command-line interaction
+if __name__ == "__main__":
+    load_tasks()
+    while True:
+        command = input("Enter command (add, list, complete, exit): ")
+        if command == "add":
+            title = input("Title: ")
+            description = input("Description: ")
+            due_date = input("Due Date (optional): ")
+            add_task(title, description, due_date)
+        elif command == "list":
+            list_tasks()
+        elif command == "complete":
+            index = int(input("Task number to mark as completed: ")) - 1
+            mark_completed(index)
+        elif command == "exit":
+            break
+import tkinter as tk
+from tkinter import messagebox
+import json
+
+tasks = []
+
+def save_tasks(filename='tasks.json'):
+    with open(filename, 'w') as f:
+        json.dump([task.__dict__ for task in tasks], f)
+
+def load_tasks(filename='tasks.json'):
+    global tasks
+    try:
+        with open(filename, 'r') as f:
+            tasks = [Task(**task) for task in json.load(f)]
+    except FileNotFoundError:
+        tasks = []
+
+class Task:
+    def __init__(self, title, description='', due_date=None, completed=False):
+        self.title = title
+        self.description = description
+        self.due_date = due_date
+        self.completed = completed
+
+def add_task():
+    title = title_entry.get()
+    description = description_entry.get()
+    due_date = due_date_entry.get()
+    if title:
+        task = Task(title, description, due_date)
+        tasks.append(task)
+        save_tasks()
+        update_task_list()
+    else:
+        messagebox.showwarning("Input Error", "Title is required.")
+
+def update_task_list():
+    task_list.delete(0, tk.END)
+    for i, task in enumerate(tasks):
+        status = "Completed" if task.completed else "Pending"
+        task_list.insert(tk.END, f"{i+1}. {task.title} - {status}")
+
+root = tk.Tk()
+root.title("To-Do List")
+
+title_label = tk.Label(root, text="Title")
+title_label.pack()
+title_entry = tk.Entry(root)
+title_entry.pack()
+
+description_label = tk.Label(root, text="Description")
+description_label.pack()
+description_entry = tk.Entry(root)
+description_entry.pack()
+
+due_date_label = tk.Label(root, text="Due Date")
+due_date_label.pack()
+due_date_entry = tk.Entry(root)
+due_date_entry.pack()
+
+add_button = tk.Button(root, text="Add Task", command=add_task)
+add_button.pack()
+
+task_list = tk.Listbox(root)
+task_list.pack()
+
+load_tasks()
+update_task_list()
+
+root.mainloop()
